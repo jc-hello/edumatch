@@ -1,0 +1,26 @@
+import { api, unwrap } from '@/lib/api';
+import type { User } from '@/stores/auth-store';
+
+export const usersService = {
+  async updateProfile(input: {
+    fullName?: string;
+    phone?: string;
+    avatarUrl?: string;
+  }): Promise<User> {
+    const { data } = await api.patch('/users/me', input);
+    return unwrap<User>(data);
+  },
+
+  async changePassword(input: {
+    currentPassword: string;
+    newPassword: string;
+  }): Promise<{ message: string }> {
+    const { data } = await api.patch('/users/me/password', input);
+    return unwrap(data);
+  },
+
+  async deleteAccount(): Promise<{ message: string }> {
+    const { data } = await api.delete('/users/me');
+    return unwrap(data);
+  },
+};
