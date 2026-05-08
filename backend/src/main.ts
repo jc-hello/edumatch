@@ -63,15 +63,12 @@ async function bootstrap() {
           ' ',
       )
       .setVersion('1.0')
-      .addBearerAuth(
-        {
-          type: 'http',
-          scheme: 'bearer',
-          bearerFormat: 'JWT',
-          description: 'Paste your access token here (without "Bearer " prefix)',
-        },
-        'JWT',
-      )
+      .addBearerAuth({
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        description: 'Paste your access token here (without "Bearer " prefix)',
+      })
       .addTag('Auth', 'Register, login, OAuth, token rotation, password reset')
       .addTag('Users', 'Profile management, password change, account deletion')
       .build();

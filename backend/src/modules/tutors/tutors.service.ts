@@ -325,12 +325,12 @@ export class TutorsService {
     const qb = this.reviewRepo
       .createQueryBuilder('r')
       .leftJoinAndSelect('r.student', 's')
-      .where('r.tutor_id = :tid', { tid: profile.userId })
-      .andWhere('r.is_visible = true');
+      .where('r.tutorId = :tid', { tid: profile.userId })
+      .andWhere('r.isVisible = true');
 
     if (dto.rating) qb.andWhere('r.rating = :rt', { rt: dto.rating });
 
-    qb.orderBy('r.created_at', 'DESC').skip((page - 1) * limit).take(limit);
+    qb.orderBy('r.createdAt', 'DESC').skip((page - 1) * limit).take(limit);
 
     const [reviews, total] = await qb.getManyAndCount();
 
