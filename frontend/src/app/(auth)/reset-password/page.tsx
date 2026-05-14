@@ -8,20 +8,26 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { CheckCircle2 } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { CheckCircle2, ShieldAlert } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { FormField } from '@/components/ui/form-field';
 import { authService } from '@/services/auth.service';
+import { getErrorMessage } from '@/lib/api';
 
-const schema = z.object({
-  newPassword: z
-    .string()
-    .min(8, 'Mật khẩu phải có ít nhất 8 ký tự')
-    .regex(/[A-Z]/, 'Mật khẩu phải có ít nhất 1 chữ in hoa')
-    .regex(/\d/, 'Mật khẩu phải có ít nhất 1 chữ số'),
-});
+const schema = z
+  .object({
+    newPassword: z
+      .string()
+      .min(8, 'Mật khẩu phải có ít nhất 8 ký tự')
+      .regex(/[A-Z]/, 'Mật khẩu phải có ít nhất 1 chữ in hoa')
+      .regex(/\d/, 'Mật khẩu phải có ít nhất 1 chữ số'),
+    confirmPassword: z.string(),
+  })
+  .refine((d) => d.newPassword === d.confirmPassword, {
+    message: 'Mật khẩu xác nhận không khớp',
+    path: ['confirmPassword'],
+  });
 type FormValues = z.infer<typeof schema>;
 
 function ResetPasswordInner() {
@@ -40,8 +46,8 @@ function ResetPasswordInner() {
   const mutation = useMutation({
     mutationFn: (v: FormValues) => authService.resetPassword(token, v.newPassword),
     onSuccess: () => setDone(true),
-    onError: (err: any) => {
-      toast.error(err?.response?.data?.error?.message || 'Token không hợp lệ hoặc đã hết hạn');
+    onError: (err: unknown) => {
+      toast.error(getErrorMessage(err, 'Token không hợp lệ hoặc đã hết hạn'));
     },
   });
 
@@ -57,72 +63,74 @@ function ResetPasswordInner() {
 
   if (!token) {
     return (
-      <Card className="w-full max-w-md">
-        <CardContent className="pt-6 text-center">
-          <h2 className="text-lg font-semibold text-red-600">Token không hợp lệ</h2>
-          <p className="mt-2 text-sm text-gray-600">
-            Vui lòng dùng link trong email để đặt lại mật khẩu.
-          </p>
-          <Button className="mt-6" variant="outline" asChild>
-            <Link href="/forgot-password">Yêu cầu link mới</Link>
-          </Button>
-        </CardContent>
-      </Card>
+      <div className="w-full max-w-md text-center edm-animate-fade-up">
+        <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-red-50 text-red-600">
+          <ShieldAlert className="h-7 w-7" />
+        </span>
+        <h1 className="mt-6 text-2xl font-bold text-foreground" style={{ fontFamily: 'var(--font-display)' }}>
+          Token không hợp lệ.
+        </h1>
+        <p className="mt-3 text-muted-foreground">Vui lòng dùng link trong email để đặt lại mật khẩu.</p>
+        <Button className="mt-8" asChild variant="outline">
+          <Link href="/forgot-password">Yêu cầu link mới</Link>
+        </Button>
+      </div>
     );
   }
 
   if (done) {
     return (
-      <Card className="w-full max-w-md">
-        <CardContent className="pt-6 text-center">
-          <CheckCircle2 className="mx-auto h-12 w-12 text-green-500" />
-          <h2 className="mt-4 text-lg font-semibold">Đặt lại mật khẩu thành công</h2>
-          <p className="mt-2 text-sm text-gray-600">
-            Tự động chuyển đến trang đăng nhập trong {countdown}s…
-          </p>
-          <Button className="mt-6" asChild>
-            <Link href="/login">Đăng nhập ngay</Link>
-          </Button>
-        </CardContent>
-      </Card>
+      <div className="w-full max-w-md text-center edm-animate-fade-up">
+        <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600">
+          <CheckCircle2 className="h-7 w-7" />
+        </span>
+        <h1 className="mt-6 text-2xl font-bold text-foreground" style={{ fontFamily: 'var(--font-display)' }}>
+          Đặt lại mật khẩu thành công.
+        </h1>
+        <p className="mt-3 text-muted-foreground">Chuyển đến trang đăng nhập trong {countdown}s…</p>
+        <Button className="mt-8" asChild>
+          <Link href="/login">Đăng nhập ngay</Link>
+        </Button>
+      </div>
     );
   }
 
   return (
-    <Card className="w-full max-w-md">
-      <CardHeader>
-        <CardTitle>Đặt lại mật khẩu</CardTitle>
-        <CardDescription>Nhập mật khẩu mới của bạn.</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit((v) => mutation.mutate(v))} className="space-y-4">
-          <FormField
-            label="Mật khẩu mới"
-            htmlFor="newPassword"
-            error={errors.newPassword?.message}
-            hint="Ít nhất 8 ký tự, gồm 1 chữ in hoa và 1 số"
-            required
-          >
-            <Input
-              id="newPassword"
-              type="password"
-              autoComplete="new-password"
-              {...register('newPassword')}
-            />
-          </FormField>
+    <div className="w-full max-w-md edm-animate-fade-up">
+      <h1 className="text-3xl font-bold tracking-tight text-foreground" style={{ fontFamily: 'var(--font-display)' }}>
+        Đặt lại mật khẩu.
+      </h1>
+      <p className="mt-2 text-muted-foreground">Chọn mật khẩu mới đủ mạnh để bảo vệ tài khoản.</p>
 
-          <Button type="submit" className="w-full" loading={mutation.isPending}>
-            Đặt lại mật khẩu
-          </Button>
-        </form>
-      </CardContent>
-    </Card>
+      <form onSubmit={handleSubmit((v) => mutation.mutate(v))} className="mt-8 space-y-5">
+        <FormField
+          label="Mật khẩu mới"
+          htmlFor="newPassword"
+          error={errors.newPassword?.message}
+          hint="Ít nhất 8 ký tự, gồm 1 chữ in hoa và 1 số"
+          required
+        >
+          <Input id="newPassword" type="password" autoComplete="new-password" {...register('newPassword')} />
+        </FormField>
+        <FormField
+          label="Xác nhận mật khẩu mới"
+          htmlFor="confirmPassword"
+          error={errors.confirmPassword?.message}
+          required
+        >
+          <Input id="confirmPassword" type="password" autoComplete="new-password" {...register('confirmPassword')} />
+        </FormField>
+        <Button type="submit" className="w-full" size="lg" loading={mutation.isPending}>
+          Đặt lại mật khẩu
+        </Button>
+      </form>
+    </div>
   );
 }
 
 export default function ResetPasswordPage() {
   return (
-    <Suspense fallback={<div className="text-gray-500">Loading…</div>}>
+    <Suspense fallback={<div className="text-muted-foreground">Đang tải…</div>}>
       <ResetPasswordInner />
     </Suspense>
   );

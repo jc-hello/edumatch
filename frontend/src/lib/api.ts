@@ -81,10 +81,24 @@ api.interceptors.response.use(
 );
 
 // Helper: unwrap our backend's ApiResponse<T> wrapper.
-export function unwrap<T>(payload: any): T {
+export function unwrap<T>(payload: unknown): T {
   if (payload && typeof payload === 'object' && 'success' in payload) {
-    if (payload.success) return payload.data as T;
-    throw new Error(payload.error?.message || 'Request failed');
+    const response = payload as {
+      success: boolean;
+      data?: unknown;
+      error?: { message?: string };
+    };
+    if (response.success) return response.data as T;
+    throw new Error(response.error?.message || 'Request failed');
   }
   return payload as T;
+}
+
+export function getErrorMessage(error: unknown, fallback = 'Request failed') {
+  if (error instanceof Error && error.message) return error.message;
+  if (typeof error === 'object' && error !== null && 'response' in error) {
+    const maybeAxios = error as { response?: { data?: { error?: { message?: string } } } };
+    return maybeAxios.response?.data?.error?.message || fallback;
+  }
+  return fallback;
 }

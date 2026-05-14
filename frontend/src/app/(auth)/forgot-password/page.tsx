@@ -6,9 +6,7 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
-import { toast } from 'sonner';
-import { CheckCircle2 } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { ArrowLeft, CheckCircle2, MailCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { FormField } from '@/components/ui/form-field';
@@ -19,6 +17,7 @@ type FormValues = z.infer<typeof schema>;
 
 export default function ForgotPasswordPage() {
   const [submitted, setSubmitted] = useState(false);
+  const [email, setEmail] = useState('');
   const {
     register,
     handleSubmit,
@@ -28,52 +27,77 @@ export default function ForgotPasswordPage() {
   const mutation = useMutation({
     mutationFn: (v: FormValues) => authService.forgotPassword(v.email),
     onSuccess: () => setSubmitted(true),
-    onError: () => {
-      // Backend always returns 200 — show success even on error to prevent enumeration
-      setSubmitted(true);
-    },
+    onError: () => setSubmitted(true),
   });
 
   if (submitted) {
     return (
-      <Card className="w-full max-w-md">
-        <CardContent className="pt-6 text-center">
-          <CheckCircle2 className="mx-auto h-12 w-12 text-green-500" />
-          <h2 className="mt-4 text-lg font-semibold">Kiểm tra hộp thư</h2>
-          <p className="mt-2 text-sm text-gray-600">
-            Nếu email tồn tại trong hệ thống, chúng tôi đã gửi link đặt lại mật khẩu cho bạn. Link sẽ hết hạn sau 1 giờ.
-          </p>
-          <Button className="mt-6" variant="outline" asChild>
-            <Link href="/login">Quay lại đăng nhập</Link>
+      <div className="w-full max-w-md text-center edm-animate-fade-up">
+        <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600">
+          <MailCheck className="h-7 w-7" />
+        </span>
+        <h1
+          className="mt-6 text-2xl font-bold tracking-tight text-foreground"
+          style={{ fontFamily: 'var(--font-display)' }}
+        >
+          Kiểm tra hộp thư của bạn.
+        </h1>
+        <p className="mt-3 text-muted-foreground">
+          Nếu <span className="font-medium text-foreground">{email || 'email'}</span> tồn tại trong hệ thống,
+          chúng tôi đã gửi link đặt lại mật khẩu. Link hết hạn sau 1 giờ.
+        </p>
+        <div className="mt-8 space-y-3">
+          <Button asChild variant="outline" className="w-full">
+            <Link href="/login">
+              <ArrowLeft className="mr-2 h-4 w-4" /> Quay lại đăng nhập
+            </Link>
           </Button>
-        </CardContent>
-      </Card>
+          <button
+            type="button"
+            onClick={() => setSubmitted(false)}
+            className="text-sm text-muted-foreground transition hover:text-foreground"
+          >
+            Không nhận được email? <span className="font-medium text-accent">Gửi lại</span>
+          </button>
+        </div>
+      </div>
     );
   }
 
   return (
-    <Card className="w-full max-w-md">
-      <CardHeader>
-        <CardTitle>Quên mật khẩu</CardTitle>
-        <CardDescription>Nhập email để nhận link đặt lại mật khẩu.</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit((v) => mutation.mutate(v))} className="space-y-4">
-          <FormField label="Email" htmlFor="email" error={errors.email?.message} required>
-            <Input id="email" type="email" autoComplete="email" {...register('email')} />
-          </FormField>
-
-          <Button type="submit" className="w-full" loading={mutation.isPending}>
-            Gửi link đặt lại
-          </Button>
-        </form>
-
-        <p className="mt-6 text-center text-sm text-gray-600">
-          <Link href="/login" className="text-indigo-600 hover:underline font-medium">
-            Quay lại đăng nhập
-          </Link>
+    <div className="w-full max-w-md edm-animate-fade-up">
+      <div className="space-y-1.5">
+        <h1
+          className="text-3xl font-bold tracking-tight text-foreground"
+          style={{ fontFamily: 'var(--font-display)' }}
+        >
+          Quên mật khẩu?
+        </h1>
+        <p className="text-muted-foreground">
+          Nhập email tài khoản, chúng tôi sẽ gửi link đặt lại trong vòng vài phút.
         </p>
-      </CardContent>
-    </Card>
+      </div>
+
+      <form
+        onSubmit={handleSubmit((v) => {
+          setEmail(v.email);
+          mutation.mutate(v);
+        })}
+        className="mt-8 space-y-5"
+      >
+        <FormField label="Email" htmlFor="email" error={errors.email?.message} required>
+          <Input id="email" type="email" autoComplete="email" placeholder="ban@email.com" {...register('email')} />
+        </FormField>
+        <Button type="submit" className="w-full" size="lg" loading={mutation.isPending}>
+          <CheckCircle2 className="mr-2 h-4 w-4" /> Gửi link đặt lại
+        </Button>
+      </form>
+
+      <p className="mt-6 text-center text-sm text-muted-foreground">
+        <Link href="/login" className="font-semibold text-accent hover:underline">
+          ← Quay lại đăng nhập
+        </Link>
+      </p>
+    </div>
   );
 }

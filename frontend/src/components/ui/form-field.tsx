@@ -14,16 +14,16 @@ interface FormFieldProps {
 
 export function FormField({ label, htmlFor, error, hint, required, children, className }: FormFieldProps) {
   return (
-    <div className={cn('flex flex-col gap-1.5', className)}>
+    <div className={cn('flex flex-col gap-2', className)}>
       <Label htmlFor={htmlFor}>
         {label}
-        {required && <span className="text-red-500 ml-1">*</span>}
+        {required && <span className="text-destructive ml-1">*</span>}
       </Label>
       {children}
       {error ? (
-        <p className="text-xs text-red-600">{error}</p>
+        <p className="text-xs font-medium text-red-600">{error}</p>
       ) : hint ? (
-        <p className="text-xs text-gray-500">{hint}</p>
+        <p className="text-xs text-muted-foreground">{hint}</p>
       ) : null}
     </div>
   );

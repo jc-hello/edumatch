@@ -6,23 +6,28 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
 
 const buttonVariants = cva(
-  'inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed',
+  'group inline-flex items-center justify-center whitespace-nowrap rounded-xl text-sm font-semibold transition-all duration-200 ease-out focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50 active:scale-[0.98]',
   {
     variants: {
       variant: {
-        default: 'bg-indigo-600 text-white hover:bg-indigo-700',
-        destructive: 'bg-red-600 text-white hover:bg-red-700',
+        default:
+          'edm-gradient-bg text-white shadow-[var(--shadow-accent)] hover:-translate-y-0.5 hover:shadow-[var(--shadow-accent-lg)] hover:brightness-110',
         outline:
-          'border border-gray-300 bg-white text-gray-900 hover:bg-gray-50',
-        secondary: 'bg-gray-100 text-gray-900 hover:bg-gray-200',
-        ghost: 'text-gray-900 hover:bg-gray-100',
-        link: 'text-indigo-600 underline-offset-4 hover:underline',
+          'border border-border bg-card text-foreground shadow-[var(--shadow-card)] hover:-translate-y-0.5 hover:border-accent/30 hover:shadow-[var(--shadow-card-lg)]',
+        secondary:
+          'bg-muted text-foreground hover:-translate-y-0.5 hover:bg-[color-mix(in_oklab,var(--muted)_88%,var(--accent))]',
+        ghost: 'text-muted-foreground hover:bg-muted hover:text-foreground',
+        link: 'text-accent underline-offset-4 hover:underline',
+        destructive:
+          'bg-red-600 text-white shadow-sm hover:-translate-y-0.5 hover:bg-red-700',
+        invert:
+          'bg-foreground text-background hover:-translate-y-0.5 hover:bg-foreground/90 shadow-[var(--shadow-card-lg)]',
       },
       size: {
-        default: 'h-10 px-4 py-2',
-        sm: 'h-8 rounded-md px-3 text-xs',
-        lg: 'h-11 rounded-md px-8',
-        icon: 'h-10 w-10',
+        sm: 'h-9 px-3 text-xs',
+        default: 'h-11 px-5',
+        lg: 'h-14 px-7 text-base',
+        icon: 'h-11 w-11',
       },
     },
     defaultVariants: { variant: 'default', size: 'default' },
@@ -48,9 +53,9 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       >
         {loading ? (
           <span className="inline-flex items-center gap-2">
-            <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
-              <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" className="opacity-25"/>
-              <path d="M4 12a8 8 0 018-8" stroke="currentColor" strokeWidth="4" className="opacity-75"/>
+            <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden>
+              <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" className="opacity-25" />
+              <path d="M4 12a8 8 0 018-8" stroke="currentColor" strokeWidth="4" className="opacity-75" />
             </svg>
             <span>{children}</span>
           </span>
@@ -62,3 +67,5 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   },
 );
 Button.displayName = 'Button';
+
+export { buttonVariants };

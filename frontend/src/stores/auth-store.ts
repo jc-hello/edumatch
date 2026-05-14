@@ -40,7 +40,6 @@ export const useAuthStore = create<AuthState>()(
     {
       name: 'edumatch-auth',
       onRehydrateStorage: () => (state) => {
-        state?.hasHydrated && state.hasHydrated;
         if (state) state.hasHydrated = true;
       },
     },

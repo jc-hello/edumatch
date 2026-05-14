@@ -27,7 +27,7 @@ export function AuthGuard({
 
   if (!hasHydrated || !accessToken || !user) {
     return (
-      <div className="flex-1 flex items-center justify-center text-gray-500">Loading…</div>
+      <div className="flex flex-1 items-center justify-center text-slate-500">Đang tải…</div>
     );
   }
   if (roles && !roles.includes(user.role)) {
