@@ -1,0 +1,26 @@
+name = "edumatch-worker"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "edumatch"
+database_id = "placeholder-replace-after-create"
+migrations_dir = "migrations"
+
+[[r2_buckets]]
+binding = "STORAGE"
+bucket_name = "edumatch-storage"
+
+[[kv_namespaces]]
+binding = "RATE_LIMIT"
+id = "placeholder-replace-after-create"
+
+[vars]
+FRONTEND_URL = "http://localhost:3001"
+
+# Secrets (set via: wrangler secret put <NAME>):
+# JWT_SECRET
+# RESEND_API_KEY
+# R2_PUBLIC_URL
