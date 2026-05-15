@@ -6,7 +6,7 @@ compatibility_flags = ["nodejs_compat"]
 [[d1_databases]]
 binding = "DB"
 database_name = "edumatch"
-database_id = "placeholder-replace-after-create"
+database_id = "d042f044-f442-4adc-95f0-c2719d8a2b6f"
 migrations_dir = "migrations"
 
 [[r2_buckets]]
@@ -15,7 +15,7 @@ bucket_name = "edumatch-storage"
 
 [[kv_namespaces]]
 binding = "RATE_LIMIT"
-id = "placeholder-replace-after-create"
+id = "b9480cec8bca483bb90d9ae05148a10d"
 
 [vars]
 FRONTEND_URL = "http://localhost:3001"

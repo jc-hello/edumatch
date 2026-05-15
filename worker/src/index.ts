@@ -1,6 +1,8 @@
 import { Hono } from 'hono';
+import { swaggerUI } from '@hono/swagger-ui';
 import { AppContext } from './types';
 import { corsMiddleware } from './middleware/cors';
+import { openApiSpec } from './openapi';
 
 import auth from './routes/auth';
 import users from './routes/users';
@@ -35,6 +37,16 @@ app.route('/uploads', uploads);
 app.route('/meta', meta);
 
 app.get('/health', (c) => c.json({ status: 'ok', ts: new Date().toISOString() }));
+
+// ─── Swagger ─────────────────────────────────────────────────────────────────
+app.get('/openapi.json', (c) => {
+  const { protocol, host } = new URL(c.req.url);
+  return c.json({
+    ...openApiSpec,
+    servers: [{ url: `${protocol}//${host}`, description: 'Current server' }],
+  });
+});
+app.get('/docs', swaggerUI({ url: '/openapi.json' }));
 
 app.notFound((c) => c.json({ success: false, error: { code: 'NOT_FOUND', message: 'Route not found' } }, 404));
 app.onError((error, c) => {
