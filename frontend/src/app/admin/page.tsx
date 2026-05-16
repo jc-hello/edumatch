@@ -91,6 +91,19 @@ function AdminInner() {
       URL.revokeObjectURL(url);
     },
   });
+  const tutorDecision = useMutation({
+    mutationFn: ({ id, action }: { id: string; action: 'approve' | 'reject' | 'request' }) => {
+      if (action === 'approve') return adminService.approveTutor(id, 'Duyệt nhanh từ dashboard');
+      if (action === 'reject') return adminService.rejectTutor(id, 'Từ chối nhanh từ dashboard');
+      return adminService.requestTutorInfo(id, 'Vui lòng bổ sung thông tin hồ sơ.');
+    },
+    onSuccess: () => {
+      toast.success('Đã cập nhật hồ sơ gia sư');
+      queryClient.invalidateQueries({ queryKey: ['admin', 'tutors'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'overview'] });
+    },
+    onError: () => toast.error('Không cập nhật được hồ sơ gia sư'),
+  });
 
   return (
     <main className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6">
@@ -137,9 +150,26 @@ function AdminInner() {
                   <p className="truncate text-sm text-muted-foreground">{item.headline ?? 'Chưa có headline'}</p>
                 </div>
                 <StatusBadge status={item.status ?? 'pending_payment'} />
-                <Button asChild size="sm" variant="outline">
-                  <Link href={`/admin/tutors/${item.id}`}>Mở</Link>
-                </Button>
+                <div className="flex flex-wrap justify-end gap-2">
+                  <Button
+                    size="sm"
+                    onClick={() => tutorDecision.mutate({ id: item.id, action: 'approve' })}
+                    loading={tutorDecision.isPending}
+                  >
+                    Duyệt
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => tutorDecision.mutate({ id: item.id, action: 'request' })}
+                    disabled={tutorDecision.isPending}
+                  >
+                    Bổ sung
+                  </Button>
+                  <Button asChild size="sm" variant="ghost">
+                    <Link href={`/admin/tutors/${item.id}`}>Mở</Link>
+                  </Button>
+                </div>
               </div>
             ))
           )}

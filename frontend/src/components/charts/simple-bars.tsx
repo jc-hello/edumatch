@@ -10,6 +10,16 @@ interface SimpleBarsProps {
 
 export function SimpleBars({ data, height = 180, className }: SimpleBarsProps) {
   const width = 600;
+  if (data.length === 0) {
+    return (
+      <div className={className} style={{ height }}>
+        <div className="flex h-full items-center justify-center rounded-lg border border-dashed border-border bg-muted/30 text-sm text-muted-foreground">
+          Chưa có dữ liệu
+        </div>
+      </div>
+    );
+  }
+
   const max = Math.max(...data.map((d) => d.value), 1);
   const padX = 24;
   const padY = 24;

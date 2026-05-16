@@ -11,6 +11,19 @@ interface SimpleLineProps {
 
 export function SimpleLine({ data, height = 180, className, formatValue }: SimpleLineProps) {
   const width = 600;
+  if (data.length === 0) {
+    return (
+      <div
+        className={className}
+        style={{ height }}
+      >
+        <div className="flex h-full items-center justify-center rounded-lg border border-dashed border-border bg-muted/30 text-sm text-muted-foreground">
+          Chưa có dữ liệu
+        </div>
+      </div>
+    );
+  }
+
   const max = Math.max(...data.map((d) => d.value));
   const min = Math.min(...data.map((d) => d.value));
   const range = max - min || 1;
