@@ -13,6 +13,7 @@ export type ApiList<T> = {
 
 export type Tutor = {
   id: string;
+  userId?: string;
   name: string;
   title: string;
   subjects: string[];
@@ -53,6 +54,8 @@ export type Booking = {
   id: string;
   tutorId: string;
   studentId: string;
+  tutor?: { id?: string; name?: string; avatarUrl?: string | null };
+  student?: { id?: string; name?: string };
   subject: string;
   date: string;
   time: string;
@@ -235,8 +238,9 @@ export const bookingsService = {
     return unwrap(data);
   },
 
-  exportCsvUrl() {
-    return '/bookings/export.csv';
+  async exportCsv(): Promise<Blob> {
+    const { data } = await api.get('/bookings/export.csv', { responseType: 'blob' });
+    return data;
   },
 };
 
@@ -342,6 +346,11 @@ export const adminService = {
   async resolveReport(id: string, input: { resolution: string; actionTaken?: 'lock' | 'refund' | 'warn' | 'dismiss' }) {
     const { data } = await api.patch(`/admin/reports/${encodeURIComponent(id)}/resolve`, input);
     return unwrap(data);
+  },
+
+  async exportReportsCsv(): Promise<Blob> {
+    const { data } = await api.get('/admin/reports/export.csv', { responseType: 'blob' });
+    return data;
   },
 };
 

@@ -837,98 +837,81 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ── FINAL CTA — full-bleed brand splash ──────────────────────────── */}
-        <section className="relative overflow-hidden edm-gradient-bg py-16 text-white md:py-20">
-          <div className="edm-dot-pattern absolute inset-0 opacity-25" aria-hidden />
-          <div
-            className="absolute left-1/2 top-0 h-[360px] w-[360px] -translate-x-1/2 -translate-y-1/3 rounded-full bg-white/12 blur-3xl"
-            aria-hidden
-          />
-          <div
-            className="edm-animate-spin-slow absolute left-1/2 top-1/2 h-[680px] w-[680px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-dashed border-white/12"
-            aria-hidden
-          />
-          <div
-            className="absolute left-1/2 top-1/2 h-[460px] w-[460px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-dashed border-white/12"
-            aria-hidden
-          />
-
-          <div className="relative mx-auto flex max-w-4xl flex-col items-center px-6 text-center">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold text-white ring-1 ring-inset ring-white/20 backdrop-blur">
-              <Sparkles className="h-3 w-3" /> Bắt đầu trong vài phút
-            </span>
-
-            <h2
-              className="mt-4 text-3xl font-bold leading-[1.15] tracking-tight sm:text-4xl md:text-5xl"
-              style={{ fontFamily: 'var(--font-display)' }}
-            >
-              Cần học gấp? <span className="text-white/85">Đặt buổi đầu tiên ngay.</span>
-            </h2>
-
-            <p className="mt-4 max-w-xl text-sm leading-6 text-white/80 sm:text-base">
-              Hơn 1.200 gia sư đã kiểm duyệt đang chờ bạn. Đặt 1 buổi để thử, hoặc đặt cả combo —
-              không cam kết, không phí ẩn.
-            </p>
-
-            <div className="mt-7 flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
-              <Link
-                href="/tutors"
-                className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-white px-7 text-sm font-semibold text-foreground shadow-[0_10px_28px_-8px_rgba(255,255,255,0.5)] transition hover:-translate-y-0.5 hover:bg-white/95 active:scale-[0.98]"
+        {/* ── FINAL CTA ────────────────────────────────────────────────────── */}
+        <section className="border-y border-border bg-card py-16 md:py-20">
+          <div className="mx-auto grid max-w-7xl gap-8 px-4 sm:px-6 lg:grid-cols-[1fr_420px] lg:items-center">
+            <div>
+              <Badge tone="accent">
+                <Sparkles className="h-3 w-3" /> Sẵn sàng học ngay
+              </Badge>
+              <h2
+                className="mt-4 max-w-3xl text-3xl font-bold leading-tight tracking-tight text-foreground sm:text-4xl md:text-5xl"
+                style={{ fontFamily: 'var(--font-display)' }}
               >
-                Tìm gia sư miễn phí
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-              <Link
-                href="/register"
-                className="inline-flex h-12 items-center justify-center rounded-xl border border-white/35 bg-white/10 px-7 text-sm font-semibold text-white backdrop-blur transition hover:-translate-y-0.5 hover:border-white/60 hover:bg-white/15 active:scale-[0.98]"
-              >
-                Trở thành gia sư
-              </Link>
-            </div>
+                Chọn đúng gia sư cho buổi học tiếp theo.
+              </h2>
+              <p className="mt-4 max-w-2xl text-base leading-7 text-muted-foreground">
+                Tìm theo môn, cấp học và khung giờ rảnh. Đặt lịch từng buổi, thanh toán rõ ràng,
+                không cần cam kết dài hạn.
+              </p>
 
-            <div className="mt-7 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-white/70 sm:text-sm">
-              {['Hủy bất cứ lúc nào', 'Không cần thẻ tín dụng', 'Hỗ trợ 24/7'].map((item) => (
-                <span key={item} className="inline-flex items-center gap-1.5">
-                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-300" />
-                  {item}
-                </span>
-              ))}
-            </div>
-
-            <div className="mt-7 flex flex-col items-center gap-3 sm:flex-row sm:gap-4">
-              <div className="flex -space-x-2.5">
-                {featured.map((t) => {
-                  const initials = t.name
-                    .trim()
-                    .split(/\s+/)
-                    .slice(-2)
-                    .map((p) => p[0])
-                    .join('')
-                    .toUpperCase();
-                  return (
-                    <span
-                      key={t.id}
-                      className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-white text-[11px] font-bold text-accent shadow-[0_4px_12px_-2px_rgba(0,0,0,0.2)] ring-2 ring-white/60"
-                    >
-                      {initials}
-                    </span>
-                  );
-                })}
-                <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-foreground/90 text-[10px] font-bold text-white shadow-[0_4px_12px_-2px_rgba(0,0,0,0.2)] ring-2 ring-white/60 backdrop-blur">
-                  +1k
-                </span>
+              <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+                <Button asChild size="lg">
+                  <Link href="/tutors">
+                    Tìm gia sư
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
+                <Button asChild variant="outline" size="lg">
+                  <Link href="/register">Trở thành gia sư</Link>
+                </Button>
               </div>
-              <div className="text-xs sm:text-left sm:text-sm">
-                <div className="flex items-center justify-center gap-0.5 sm:justify-start">
-                  {[1, 2, 3, 4, 5].map((i) => (
-                    <Star key={i} className="h-3.5 w-3.5 fill-amber-300 text-amber-300" />
-                  ))}
-                  <span className="ml-1.5 font-bold text-white">4.8</span>
-                  <span className="text-white/60">/5</span>
-                </div>
-                <p className="mt-0.5 text-[11px] text-white/70 sm:text-xs">
-                  Đánh giá từ hơn 18.000 buổi học hoàn thành
-                </p>
+
+              <div className="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-sm text-muted-foreground">
+                {['Hủy trước 24h hoàn 100%', 'Thanh toán ký quỹ', 'Không phí đăng ký'].map((item) => (
+                  <span key={item} className="inline-flex items-center gap-1.5">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                    {item}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-border bg-muted/30 p-5 shadow-[var(--shadow-card)]">
+              <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                Bắt đầu trong 3 bước
+              </p>
+              <div className="mt-4 space-y-3">
+                {[
+                  {
+                    step: '01',
+                    title: 'Lọc theo nhu cầu',
+                    body: 'Chọn môn, cấp học, hình thức và ngân sách.',
+                  },
+                  {
+                    step: '02',
+                    title: 'Chọn lịch rảnh',
+                    body: 'Xem slot trống và gửi mục tiêu cho buổi học.',
+                  },
+                  {
+                    step: '03',
+                    title: 'Thanh toán an toàn',
+                    body: 'Tiền được giữ ký quỹ đến khi buổi học hoàn tất.',
+                  },
+                ].map((item) => (
+                  <div key={item.step} className="flex gap-3 rounded-xl border border-border bg-card p-4">
+                    <span
+                      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[var(--accent-tint)] text-xs font-bold text-accent"
+                      style={{ fontFamily: 'var(--font-mono)' }}
+                    >
+                      {item.step}
+                    </span>
+                    <div>
+                      <p className="font-semibold text-foreground">{item.title}</p>
+                      <p className="mt-1 text-sm leading-6 text-muted-foreground">{item.body}</p>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           </div>

@@ -3,15 +3,38 @@
 import Link from 'next/link';
 import { CalendarDays, CheckCircle2, Heart, MapPin, Star, Video } from 'lucide-react';
 import { useState } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Tutor, formatVnd } from '@/data/mock-data';
+import type { Tutor } from '@/services/edumatch.service';
+import { favoritesService } from '@/services/edumatch.service';
+import { formatVnd } from '@/lib/format';
+import { useAuthStore } from '@/stores/auth-store';
 import { cn } from '@/lib/utils';
 
-export function TutorCard({ tutor }: { tutor: Tutor }) {
-  const [liked, setLiked] = useState(false);
+export function TutorCard({ tutor, favorite = false }: { tutor: Tutor; favorite?: boolean }) {
+  const [liked, setLiked] = useState(favorite);
+  const user = useAuthStore((s) => s.user);
+  const queryClient = useQueryClient();
+  const favoriteMutation = useMutation({
+    mutationFn: async () => {
+      if (liked) {
+        await favoritesService.remove(tutor.userId ?? tutor.id);
+        return false;
+      }
+      await favoritesService.add(tutor.userId ?? tutor.id);
+      return true;
+    },
+    onSuccess: (nextLiked) => {
+      setLiked(nextLiked);
+      queryClient.invalidateQueries({ queryKey: ['favorites'] });
+      toast.success(nextLiked ? 'Đã lưu gia sư' : 'Đã bỏ lưu gia sư');
+    },
+    onError: () => toast.error('Không cập nhật được yêu thích'),
+  });
 
   return (
     <Card className="edm-lift overflow-hidden">
@@ -40,13 +63,20 @@ export function TutorCard({ tutor }: { tutor: Tutor }) {
                 </div>
                 <button
                   type="button"
-                  onClick={() => setLiked((v) => !v)}
+                  onClick={() => {
+                    if (!user) {
+                      toast.info('Bạn cần đăng nhập để lưu gia sư');
+                      return;
+                    }
+                    favoriteMutation.mutate();
+                  }}
                   className={cn(
                     'flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-border transition',
                     liked
                       ? 'border-red-200 bg-red-50 text-red-500'
                       : 'text-muted-foreground hover:border-accent/30 hover:text-foreground',
                   )}
+                  disabled={favoriteMutation.isPending}
                   aria-label="Yêu thích"
                 >
                   <Heart className={cn('h-4 w-4', liked && 'fill-current')} />
@@ -76,7 +106,7 @@ export function TutorCard({ tutor }: { tutor: Tutor }) {
                 </span>
                 <span className="inline-flex items-center gap-1.5">
                   <Video className="h-4 w-4" />
-                  {tutor.format}
+                  {formatLabel(tutor.format)}
                 </span>
                 <span className="inline-flex items-center gap-1.5">
                   <CalendarDays className="h-4 w-4" />
@@ -100,4 +130,11 @@ export function TutorCard({ tutor }: { tutor: Tutor }) {
       </CardContent>
     </Card>
   );
+}
+
+function formatLabel(value?: string) {
+  if (value === 'online') return 'Online';
+  if (value === 'offline') return 'Trực tiếp';
+  if (value === 'flex') return 'Linh hoạt';
+  return value ?? 'Linh hoạt';
 }

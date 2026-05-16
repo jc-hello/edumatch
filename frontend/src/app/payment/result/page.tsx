@@ -6,7 +6,7 @@ import { useSearchParams } from 'next/navigation';
 import { CheckCircle2, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { formatVnd } from '@/data/mock-data';
+import { formatVnd } from '@/lib/format';
 
 function ResultInner() {
   const params = useSearchParams();

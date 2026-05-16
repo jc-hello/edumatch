@@ -84,6 +84,15 @@ function ProfileInner() {
     },
     onError: (err: unknown) => toast.error(getErrorMessage(err, 'Cập nhật thất bại')),
   });
+  const avatarMutation = useMutation({
+    mutationFn: usersService.uploadAvatar,
+    onSuccess: ({ avatarUrl }) => {
+      profileForm.setValue('avatarUrl', avatarUrl);
+      updateMutation.mutate({ avatarUrl });
+      toast.success('Đã tải ảnh đại diện');
+    },
+    onError: (err: unknown) => toast.error(getErrorMessage(err, 'Tải ảnh thất bại')),
+  });
 
   const passwordForm = useForm<PasswordValues>({ resolver: zodResolver(passwordSchema) });
   const passwordMutation = useMutation({
@@ -139,9 +148,20 @@ function ProfileInner() {
               <Badge tone="accent">{me?.role === 'tutor' ? 'Gia sư' : me?.role === 'admin' ? 'Quản trị' : 'Học sinh'}</Badge>
             </div>
           </div>
-          <Button variant="outline">
-            <Upload className="mr-2 h-4 w-4" /> Đổi ảnh
-          </Button>
+          <label className="inline-flex h-11 cursor-pointer items-center justify-center rounded-xl border border-border bg-card px-5 text-sm font-semibold text-foreground shadow-[var(--shadow-card)] transition hover:-translate-y-0.5 hover:border-accent/30 hover:shadow-[var(--shadow-card-lg)]">
+            <Upload className="mr-2 h-4 w-4" />
+            {avatarMutation.isPending ? 'Đang tải...' : 'Đổi ảnh'}
+            <input
+              type="file"
+              accept="image/*"
+              className="sr-only"
+              onChange={(event) => {
+                const file = event.target.files?.[0];
+                if (file) avatarMutation.mutate(file);
+                event.currentTarget.value = '';
+              }}
+            />
+          </label>
         </CardContent>
       </Card>
 

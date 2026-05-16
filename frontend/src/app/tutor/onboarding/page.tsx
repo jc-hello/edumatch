@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useForm, useWatch } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useMutation } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import {
   ArrowLeft,
@@ -25,6 +26,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { FormField } from '@/components/ui/form-field';
 import { cn } from '@/lib/utils';
+import { tutorsService } from '@/services/edumatch.service';
 
 const personalSchema = z.object({
   headline: z.string().min(5, 'Tối thiểu 5 ký tự'),
@@ -90,6 +92,32 @@ function OnboardingInner() {
   const subjectsForm = useForm<SubjectsValues>({
     resolver: zodResolver(subjectsSchema),
     defaultValues: data.subjects,
+  });
+  const submitProfile = useMutation({
+    mutationFn: async () => {
+      if (!data.personal || !data.education || !data.subjects) {
+        throw new Error('Thiếu thông tin hồ sơ');
+      }
+      return tutorsService.createProfile({
+        headline: data.personal.headline,
+        bio: data.personal.bio,
+        location: data.personal.location,
+        format: data.personal.format,
+        education: data.education,
+        subjects: splitCsv(data.subjects.subjects),
+        levels: splitCsv(data.subjects.levels),
+        price: data.subjects.price,
+        payout: {
+          bank: data.subjects.bank,
+          account: data.subjects.account,
+        },
+      });
+    },
+    onSuccess: () => {
+      toast.success('Hồ sơ đã gửi! Admin sẽ duyệt trong 24 giờ.');
+      router.push('/tutor/dashboard');
+    },
+    onError: (error) => toast.error(error instanceof Error ? error.message : 'Không gửi được hồ sơ'),
   });
 
   return (
@@ -337,10 +365,7 @@ function OnboardingInner() {
             </form>
           )}
 
-          {step === 3 && <Summary data={data} onBack={() => setStep(2)} onSubmit={() => {
-            toast.success('Hồ sơ đã gửi! Admin sẽ duyệt trong 24 giờ.');
-            router.push('/tutor/dashboard');
-          }} />}
+          {step === 3 && <Summary data={data} onBack={() => setStep(2)} onSubmit={() => submitProfile.mutate()} loading={submitProfile.isPending} />}
         </CardContent>
       </Card>
     </main>
@@ -372,6 +397,7 @@ function Summary({
   data,
   onBack,
   onSubmit,
+  loading,
 }: {
   data: {
     personal?: PersonalValues;
@@ -380,6 +406,7 @@ function Summary({
   };
   onBack: () => void;
   onSubmit: () => void;
+  loading?: boolean;
 }) {
   const sections = [
     { icon: User, label: 'Thông tin', body: data.personal && (
@@ -448,10 +475,14 @@ function Summary({
         <Button type="button" variant="ghost" onClick={onBack}>
           <ArrowLeft className="mr-1 h-4 w-4" /> Sửa lại
         </Button>
-        <Button onClick={onSubmit}>
+        <Button onClick={onSubmit} loading={loading}>
           <CheckCircle2 className="mr-1 h-4 w-4" /> Gửi duyệt
         </Button>
       </div>
     </div>
   );
+}
+
+function splitCsv(value: string) {
+  return value.split(',').map((item) => item.trim()).filter(Boolean);
 }

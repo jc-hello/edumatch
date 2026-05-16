@@ -4,47 +4,10 @@ import * as React from 'react';
 import Link from 'next/link';
 import { Bell, CalendarCheck, MessageCircle, Wallet } from 'lucide-react';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { cn } from '@/lib/utils';
-
-type Notification = {
-  id: string;
-  icon: 'booking' | 'message' | 'wallet';
-  title: string;
-  body: string;
-  time: string;
-  href: string;
-  unread?: boolean;
-};
-
-// Stub data — replace with real /notifications endpoint when backend is ready.
-const initial: Notification[] = [
-  {
-    id: 'n1',
-    icon: 'booking',
-    title: 'Yêu cầu đặt lịch mới',
-    body: 'Nguyễn Mai Anh đã chấp nhận buổi học Toán 12 Thứ 4, 19:00.',
-    time: '5 phút trước',
-    href: '/bookings',
-    unread: true,
-  },
-  {
-    id: 'n2',
-    icon: 'wallet',
-    title: 'Thanh toán thành công',
-    body: 'Buổi học IELTS Speaking đã được ký quỹ 450.000 VND.',
-    time: '1 giờ trước',
-    href: '/bookings',
-    unread: true,
-  },
-  {
-    id: 'n3',
-    icon: 'message',
-    title: 'Có đánh giá mới',
-    body: 'Học sinh đã để lại đánh giá 5 sao cho buổi học hôm qua.',
-    time: 'Hôm qua',
-    href: '/dashboard',
-  },
-];
+import { notificationsService, type Notification } from '@/services/edumatch.service';
+import { asArray, shortDate } from '@/lib/format';
 
 const iconMap = {
   booking: CalendarCheck,
@@ -53,12 +16,18 @@ const iconMap = {
 };
 
 export function NotificationCenter() {
-  const [items, setItems] = React.useState(initial);
-  const unread = items.filter((n) => n.unread).length;
+  const queryClient = useQueryClient();
+  const { data, isLoading } = useQuery({
+    queryKey: ['notifications'],
+    queryFn: () => notificationsService.list({ page: 1 }),
+  });
+  const items = asArray<Notification>(data).slice(0, 8);
+  const unread = items.filter((n) => !n.read).length;
 
-  function markAllRead() {
-    setItems((prev) => prev.map((n) => ({ ...n, unread: false })));
-  }
+  const markAll = useMutation({
+    mutationFn: notificationsService.markAllRead,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['notifications'] }),
+  });
 
   return (
     <DropdownMenu.Root>
@@ -86,22 +55,30 @@ export function NotificationCenter() {
             <p className="text-sm font-semibold text-foreground">Thông báo</p>
             <button
               type="button"
-              onClick={markAllRead}
+              onClick={() => markAll.mutate()}
               className="text-xs font-medium text-accent hover:underline"
             >
               Đánh dấu đã đọc
             </button>
           </div>
           <div className="max-h-96 overflow-auto py-2">
+            {isLoading && (
+              <p className="px-4 py-8 text-center text-sm text-muted-foreground">Đang tải…</p>
+            )}
+            {!isLoading && items.length === 0 && (
+              <p className="px-4 py-8 text-center text-sm text-muted-foreground">
+                Chưa có thông báo
+              </p>
+            )}
             {items.map((n) => {
-              const Icon = iconMap[n.icon];
+              const Icon = iconMap[pickIcon(n.type)];
               return (
                 <DropdownMenu.Item asChild key={n.id}>
                   <Link
-                    href={n.href}
+                    href="/bookings"
                     className={cn(
                       'flex gap-3 px-4 py-3 text-sm outline-hidden transition focus:bg-muted',
-                      n.unread && 'bg-[var(--accent-tint)]/40',
+                      !n.read && 'bg-[var(--accent-tint)]/40',
                     )}
                   >
                     <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[var(--accent-tint)] text-accent">
@@ -110,9 +87,11 @@ export function NotificationCenter() {
                     <div className="min-w-0 flex-1">
                       <p className="font-semibold text-foreground">{n.title}</p>
                       <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">{n.body}</p>
-                      <p className="mt-1 text-[11px] font-medium text-muted-foreground">{n.time}</p>
+                      <p className="mt-1 text-[11px] font-medium text-muted-foreground">
+                        {shortDate(n.createdAt)}
+                      </p>
                     </div>
-                    {n.unread && <span className="mt-2 h-2 w-2 shrink-0 rounded-full bg-accent" />}
+                    {!n.read && <span className="mt-2 h-2 w-2 shrink-0 rounded-full bg-accent" />}
                   </Link>
                 </DropdownMenu.Item>
               );
@@ -127,4 +106,10 @@ export function NotificationCenter() {
       </DropdownMenu.Portal>
     </DropdownMenu.Root>
   );
+}
+
+function pickIcon(type: string): keyof typeof iconMap {
+  if (type.includes('payment') || type.includes('payout')) return 'wallet';
+  if (type.includes('message') || type.includes('review')) return 'message';
+  return 'booking';
 }

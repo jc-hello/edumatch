@@ -23,4 +23,13 @@ export const usersService = {
     const { data } = await api.delete('/users/me');
     return unwrap(data);
   },
+
+  async uploadAvatar(file: File): Promise<{ avatarUrl: string }> {
+    const formData = new FormData();
+    formData.append('file', file);
+    const { data } = await api.post('/users/me/avatar', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return unwrap(data);
+  },
 };

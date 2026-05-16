@@ -3,21 +3,41 @@
 import * as React from 'react';
 import { Star, X } from 'lucide-react';
 import { toast } from 'sonner';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
+import { reviewsService } from '@/services/edumatch.service';
 
 interface ReviewDialogProps {
   open: boolean;
   onClose: () => void;
   tutorName: string;
   subject: string;
+  bookingId?: string;
+  tutorId?: string;
 }
 
-export function ReviewDialog({ open, onClose, tutorName, subject }: ReviewDialogProps) {
+export function ReviewDialog({ open, onClose, tutorName, subject, bookingId, tutorId }: ReviewDialogProps) {
   const [rating, setRating] = React.useState(0);
   const [hover, setHover] = React.useState(0);
   const [comment, setComment] = React.useState('');
+  const queryClient = useQueryClient();
+  const reviewMutation = useMutation({
+    mutationFn: () => {
+      if (!bookingId || !tutorId) throw new Error('Thiếu thông tin booking hoặc gia sư');
+      return reviewsService.create({ bookingId, tutorId, rating, body: comment });
+    },
+    onSuccess: () => {
+      toast.success('Cảm ơn bạn đã đánh giá!');
+      queryClient.invalidateQueries({ queryKey: ['bookings'] });
+      queryClient.invalidateQueries({ queryKey: ['tutor'] });
+      setRating(0);
+      setComment('');
+      onClose();
+    },
+    onError: (error) => toast.error(error instanceof Error ? error.message : 'Không gửi được đánh giá'),
+  });
 
   if (!open) return null;
 
@@ -26,10 +46,7 @@ export function ReviewDialog({ open, onClose, tutorName, subject }: ReviewDialog
       toast.error('Vui lòng chọn số sao');
       return;
     }
-    toast.success('Cảm ơn bạn đã đánh giá!');
-    setRating(0);
-    setComment('');
-    onClose();
+    reviewMutation.mutate();
   }
 
   return (
@@ -113,7 +130,7 @@ export function ReviewDialog({ open, onClose, tutorName, subject }: ReviewDialog
           <Button variant="ghost" onClick={onClose}>
             Hủy
           </Button>
-          <Button onClick={submit}>Gửi đánh giá</Button>
+          <Button onClick={submit} loading={reviewMutation.isPending}>Gửi đánh giá</Button>
         </div>
       </div>
     </div>
